@@ -60,28 +60,44 @@ def convert_srgb_to_linear_rgb(srgb_color_component: float) -> float:
     return linear_color_component
 
 
-def get_base_color(material_name):
+def get_base_color(material_name, lookup_key):
     """
     Mapping function, mapping names of materials to hex values. 
     These have to be changed based on chosen color pallete. Works only discrete color palletes.
     """
-    colorDict = {
-        'sedlova': '#66c2a5',
-        'mansardova': '#fc8d62',
-        'plocha': '#8da0cb',
-        'pultova': '#e78ac3',
-        'stanova': '#a6d854',
-        'valbova': '#ffd92f',
-        'jina': '#e5c494',
-    }
+    lookupMap = {
+        'sk': {
+            'sedlova': '#66c2a5',
+            'mansardova': '#fc8d62',
+            'plocha': '#8da0cb',
+            'pultova': '#e78ac3',
+            'stanova': '#a6d854',
+            'valbova': '#ffd92f',
+            'jina': '#e5c494'
+        },
+        'co': {
+            'komin': '#FC8D62',
+            'vez': '#A6D854',
+            'stresni_nastavba': '#8DA0CB',
+            'vytahy_klimatizace': '#E78AC3',
+            'hlavni_cast_objektu': '#E1E1E1',
+        },
+        'pk': {
+            'svisla_stena': '#FFFFFF',
+            'vodorovna_strecha': '#B2B2B2',
+            'sikma_strecha': '#DE6034',
+            'zakladova_deska': '#FFFFFF',
+        }
 
+    }
 
     # TODO - extend for plocha_kod a cast objektu
     # Default to white if not found
-    return hex_color_to_rgba(colorDict.get(material_name, '#ffffff'))
+    lookup = lookupMap.get(lookup_key, {})
+    return hex_color_to_rgba(lookup.get(material_name, '#ffffff'))
 
 
-def create_new_mat_copy(old_mat_name):
+def create_new_mat_copy(old_mat_name, lookup_key):
     """
     Create a new material copy based on the given old material name.
 
@@ -93,16 +109,15 @@ def create_new_mat_copy(old_mat_name):
     """
     newMat = bpy.data.materials.new(f'{old_mat_name}_copy')
 
-    print('creating new mat color from old mat name:',old_mat_name )
+    print('creating new mat color from old mat name:', old_mat_name)
 
     # newMat.use_nodes = True
-    newMat.diffuse_color = get_base_color(old_mat_name)
+    newMat.diffuse_color = get_base_color(old_mat_name, lookup_key)
     newMat.roughness = 1.0
     print()
     print('New Material Created')
 
     return newMat
-
 
 
 def iterate_materials():
@@ -113,7 +128,8 @@ def iterate_materials():
     Returns:
         None
     """
-    buildings_obj = bpy.data.objects.get("buildings")  # Use get to handle potential None
+    buildings_obj = bpy.data.objects.get(
+        "buildings")  # Use get to handle potential None
     if buildings_obj is None:
         print("Object 'buildings' not found")
         return
@@ -140,4 +156,48 @@ def iterate_materials():
                 print('Done copying mats')
     print('Done copying')
 
-iterate_materials()
+
+def remove_empty():
+    # Iterate through all selected objects in the scene
+    for obj in bpy.context.selected_objects:
+        print()
+        print("Object Name:", obj.name)
+        print("Object Type:", obj.type)
+        print("Is Mesh:", obj.type == 'MESH')
+
+        if obj.type == 'EMPTY':
+            print(f'{obj.name} removed !!')
+            bpy.data.objects.remove(obj, do_unlink=True)
+            continue
+    print('Removed all empty objects.')
+
+
+def iterate_selected_objects(lookup_key):
+    """
+    Iterates through the selected objects and creates a copy of each material
+    that does not end with '_copy'. The old material is then deleted.
+
+    Returns:
+        None
+    """
+    for obj in bpy.context.selected_objects:
+        if obj.data.materials:
+            # Assume each object has one material
+            curr_mat = obj.data.materials[0]
+            print('------------------ Inspecting Materials ------------------')
+            print("    - Material Name:", curr_mat.name)
+
+            newMat = create_new_mat_copy(curr_mat.name, lookup_key)
+            # Replace old material with new one
+            obj.data.materials[0] = newMat
+            old_mat_name = curr_mat.name  # Save old material name
+            bpy.data.materials.remove(curr_mat)
+            newMat.name = old_mat_name  # Rename new material
+            print('New material replaced.')
+
+    print('Done copying')
+
+
+# iterate_materials()
+remove_empty()
+iterate_selected_objects('co')
