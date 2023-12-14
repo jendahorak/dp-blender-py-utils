@@ -87,6 +87,9 @@ def get_base_color(material_name, lookup_key):
             'vodorovna_strecha': '#B2B2B2',
             'sikma_strecha': '#DE6034',
             'zakladova_deska': '#FFFFFF',
+        },
+        't': {
+            'CityEngineTerrainMaterial': '#DDDDDD'
         }
 
     }
@@ -192,12 +195,36 @@ def iterate_selected_objects(lookup_key):
             obj.data.materials[0] = newMat
             old_mat_name = curr_mat.name  # Save old material name
             bpy.data.materials.remove(curr_mat)
+
+            # if old_mat_name.startswith('CityEngineTerrainMaterial'):
+            #     old_mat_name = 'terrain_ce'
+
             newMat.name = old_mat_name  # Rename new material
             print('New material replaced.')
 
     print('Done copying')
 
 
+def merge_verts_by_distance(merge_threshold):
+    """
+    Merges vertices that are closer than the given merge threshold.
+
+    Args:
+        merge_threshold (float): The merge threshold in Blender units.
+
+    Returns:
+        None
+    """
+    for obj in bpy.context.selected_objects:
+        bpy.context.view_layer.objects.active = obj
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.remove_doubles(threshold=merge_threshold)
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+
 # iterate_materials()
 remove_empty()
-iterate_selected_objects('co')
+iterate_selected_objects('sk')
+merge_verts_by_distance(0.0001)

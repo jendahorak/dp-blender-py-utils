@@ -1,18 +1,22 @@
 import bpy
 
-def remove_all_materials():
+
+def remove_unused_materials():
     """
-    Remove all materials from the current Blender file.
+    Remove all unused materials from the current Blender file.
     """
     for material in bpy.data.materials:
-        bpy.data.materials.remove(material)
+        if material.users == 0:
+            bpy.data.materials.remove(material)
 
-def remove_all_meshes():
+
+def remove_unused_meshes():
     """
-    Remove all meshes from the current Blender file.
+    Remove all unused meshes from the current Blender file.
     """
     for mesh in bpy.data.meshes:
-        bpy.data.meshes.remove(mesh)
+        if mesh.users == 0:
+            bpy.data.meshes.remove(mesh)
 
 
 def delete_all_objects():
@@ -22,6 +26,7 @@ def delete_all_objects():
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.object.delete(use_global=False)
 
-delete_all_objects()
-remove_all_materials()
-remove_all_meshes()
+
+# delete_all_objects()
+remove_unused_materials()
+remove_unused_meshes()
