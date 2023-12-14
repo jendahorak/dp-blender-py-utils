@@ -65,6 +65,8 @@ def get_base_color(material_name, lookup_key):
     Mapping function, mapping names of materials to hex values. 
     These have to be changed based on chosen color pallete. Works only discrete color palletes.
     """
+    material_name = material_name.split('.')[0]
+
     lookupMap = {
         'sk': {
             'sedlova': '#66c2a5',
@@ -226,5 +228,5 @@ def merge_verts_by_distance(merge_threshold):
 
 # iterate_materials()
 remove_empty()
-# iterate_selected_objects('sk')
+iterate_selected_objects('sk')
 merge_verts_by_distance(0.0001)
