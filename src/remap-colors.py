@@ -226,5 +226,5 @@ def merge_verts_by_distance(merge_threshold):
 
 # iterate_materials()
 remove_empty()
-iterate_selected_objects('sk')
+# iterate_selected_objects('sk')
 merge_verts_by_distance(0.0001)
